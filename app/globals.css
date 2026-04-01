@@ -30,10 +30,6 @@
 
   /* Font */
   --font-sans: var(--font-plus-jakarta-sans), sans-serif;
-
-  /* Border radius additions */
-  --radius-xl: 0.75rem;
-  --radius-2xl: 1rem;
 }
 
 @layer base {
@@ -56,11 +52,11 @@
   }
 
   .cta-gradient {
-    background: linear-gradient(135deg, #3256d7 0%, #002585 100%);
+    background: linear-gradient(135deg, var(--color-primary-container) 0%, var(--color-on-primary) 100%);
   }
 
   .text-gradient {
-    background: linear-gradient(135deg, #b8c4ff 0%, #3256d7 100%);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-container) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -82,9 +78,9 @@
   }
 
   .nav-active {
-    border-left: 2px solid #3256d7;
-    background-color: rgba(50, 86, 215, 0.1);
-    color: #3256d7;
+    border-left: 2px solid var(--color-primary-container);
+    background-color: color-mix(in srgb, var(--color-primary-container) 10%, transparent);
+    color: var(--color-primary-container);
   }
 
   .custom-scrollbar::-webkit-scrollbar {
@@ -96,7 +92,7 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #353534;
+    background: var(--color-surface-container-highest);
     border-radius: 10px;
   }
 }
