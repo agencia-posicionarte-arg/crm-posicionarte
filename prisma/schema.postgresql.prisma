@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  password  String
+  name      String
+  role      String    @default("member")
+  createdAt DateTime  @default(now())
+  meetings  Meeting[]
+  clients   Client[]
+}
+
+model Client {
+  id                String          @id @default(cuid())
+  name              String
+  company           String
+  email             String          @unique
+  phone             String?
+  website           String?
+  industry          String?
+  status            String          @default("PROSPECTO")
+  monthlyAmount     Float           @default(0)
+  metaBudget        Float?
+  googleBudget      Float?
+  billingType       String          @default("PREPAID")
+  lastPaymentDate   DateTime?
+  lastPaidMonth     String?
+  contractStartDate DateTime?
+  lastContactDate   DateTime?
+  assignedToId      String?
+  assignedTo        User?           @relation(fields: [assignedToId], references: [id])
+  notes             String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  services          ClientService[]
+  meetings          Meeting[]
+}
+
+model ClientService {
+  id       String @id @default(cuid())
+  clientId String
+  client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  service  String
+}
+
+model Meeting {
+  id          String   @id @default(cuid())
+  title       String
+  scheduledAt DateTime
+  status      String   @default("PROGRAMADA")
+  notes       String?
+  clientId    String
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+}
