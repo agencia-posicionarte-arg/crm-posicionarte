@@ -1,15 +1,27 @@
 import { PrismaClient } from "../app/generated/prisma/client"
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3"
 import bcrypt from "bcryptjs"
-import path from "path"
 import dotenv from "dotenv"
 dotenv.config({ path: ".env.local" })
 
 const dbUrl = process.env.DATABASE_URL ?? "file:./prisma/dev.db"
-const dbPath = dbUrl.replace(/^file:/, "")
-const absolutePath = path.isAbsolute(dbPath) ? dbPath : path.join(process.cwd(), dbPath)
-const adapter = new PrismaBetterSqlite3({ url: absolutePath })
-const prisma = new PrismaClient({ adapter })
+const isPostgres = dbUrl.startsWith("postgresql://") || dbUrl.startsWith("postgres://")
+
+let prisma: PrismaClient
+
+if (isPostgres) {
+  const { Pool } = require("@neondatabase/serverless")
+  const { PrismaNeon } = require("@prisma/adapter-neon")
+  const pool = new Pool({ connectionString: dbUrl })
+  const adapter = new PrismaNeon(pool)
+  prisma = new PrismaClient({ adapter })
+} else {
+  const { PrismaBetterSqlite3 } = require("@prisma/adapter-better-sqlite3")
+  const path = require("path")
+  const dbPath = dbUrl.replace(/^file:/, "")
+  const absolutePath = path.isAbsolute(dbPath) ? dbPath : path.join(process.cwd(), dbPath)
+  const adapter = new PrismaBetterSqlite3({ url: absolutePath })
+  prisma = new PrismaClient({ adapter })
+}
 
 async function main() {
   console.log("Seeding database...")
