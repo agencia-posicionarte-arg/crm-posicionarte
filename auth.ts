@@ -16,15 +16,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const email = credentials?.email as string
         const password = credentials?.password as string
 
-        if (!email || !password) return null
+        console.log("[auth] authorize called, email:", email)
+
+        if (!email || !password) {
+          console.log("[auth] missing email or password")
+          return null
+        }
 
         const allowed = (process.env.ALLOWED_EMAILS ?? "").split(",").map(e => e.trim())
-        if (!allowed.includes(email)) return null
+        console.log("[auth] allowed emails:", allowed)
+        if (!allowed.includes(email)) {
+          console.log("[auth] email not in whitelist")
+          return null
+        }
 
         const user = await prisma.user.findUnique({ where: { email } })
+        console.log("[auth] user found:", !!user)
         if (!user) return null
 
         const valid = await bcrypt.compare(password, user.password)
+        console.log("[auth] password valid:", valid)
         if (!valid) return null
 
         return { id: user.id, email: user.email, name: user.name }

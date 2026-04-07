@@ -1,7 +1,8 @@
 import { PrismaClient } from "../app/generated/prisma/client"
 import bcrypt from "bcryptjs"
 import dotenv from "dotenv"
-if (!process.env.DATABASE_URL) dotenv.config({ path: ".env.local" })
+dotenv.config({ path: ".env.production.local", override: true })
+dotenv.config({ path: ".env.local" })
 
 const dbUrl = process.env.DATABASE_URL ?? "file:./prisma/dev.db"
 const isPostgres = dbUrl.startsWith("postgresql://") || dbUrl.startsWith("postgres://")
@@ -9,11 +10,8 @@ const isPostgres = dbUrl.startsWith("postgresql://") || dbUrl.startsWith("postgr
 let prisma: PrismaClient
 
 if (isPostgres) {
-  const { Pool, neonConfig } = require("@neondatabase/serverless")
-  neonConfig.webSocketConstructor = WebSocket // Node 21+ built-in
-  const { PrismaNeon } = require("@prisma/adapter-neon")
-  const pool = new Pool({ connectionString: dbUrl })
-  const adapter = new PrismaNeon(pool)
+  const { PrismaNeonHttp } = require("@prisma/adapter-neon")
+  const adapter = new PrismaNeonHttp(dbUrl)
   prisma = new PrismaClient({ adapter })
 } else {
   const { PrismaBetterSqlite3 } = require("@prisma/adapter-better-sqlite3")
