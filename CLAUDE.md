@@ -153,6 +153,42 @@ crm-posicionarte/
 
 ---
 
+## Estado del Deploy en Producción (actualizado 2026-04-06)
+
+### ✅ Hecho
+- Repo subido a GitHub: `agencia-posicionarte-arg/crm-posicionarte` (público)
+- Deploy en Vercel ✅ — URL: `crm-posicionarte-git-main-posicionarte-onlines-projects.vercel.app`
+- Neon (PostgreSQL serverless) creado y conectado
+- `vercel.json` usa `prisma generate && next build` (db push removido — fallaba por timeout)
+- `lib/db.ts` corregido: usa `PrismaNeonHttp` (h minúscula) + `neon()` — HTTP transport para Vercel
+- `prisma/seed.ts` corregido: soporta Neon y SQLite
+- 4 usuarios creados en Neon via SQL Editor:
+  - `santiagodambrosio2@gmail.com` (contraseña de prueba: `test1234`)
+  - `vicooceron.digital@gmail.com`
+  - `juulifour@gmail.com`
+  - `agencia.posicionarte@gmail.com`
+- `ALLOWED_EMAILS` seteado en Vercel con esos 4 emails
+
+### ⚠️ Pendiente resolver — LOGIN SIGUE FALLANDO
+- La app carga ✅, la DB conecta ✅, pero el login devuelve "credenciales incorrectas"
+- No se ve error en Vercel logs — el `authorize` en `auth.ts` falla silenciosamente
+- **Siguiente paso**: agregar `console.log` temporal en `auth.ts` para ver en qué paso falla:
+  ```typescript
+  console.log('ALLOWED:', allowed)
+  console.log('USER FOUND:', !!user)
+  console.log('VALID:', valid)
+  ```
+  Luego revisar **Vercel → Logs → Live** mientras se intenta el login
+
+### Decisiones técnicas del deploy
+- `prisma migrate deploy` → reemplazado por `prisma db push` (migraciones eran SQLite)
+- `prisma db push` removido del build — falla por timeout de Neon; schema ya está aplicado
+- El seed NO puede correr localmente contra Neon — usar Neon SQL Editor para inserts
+- `lib/db.ts`: export correcto es `PrismaNeonHttp` (NO `PrismaNeonHTTP` con HTTP mayúsculo)
+- Error "No database host" era porque Pool requiere WebSocket; solucionado con HTTP transport
+
+---
+
 ## Variables de Entorno
 
 ### Dev (`.env.local`)

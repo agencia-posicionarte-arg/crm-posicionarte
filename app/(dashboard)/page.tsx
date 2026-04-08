@@ -4,12 +4,20 @@ import { prisma } from "@/lib/db"
 import StatCard from "@/components/stat-card"
 import PipelineChart from "@/components/pipeline-chart"
 import ServiceDonut from "@/components/service-donut"
+import PaymentStatusBadge from "@/components/payment-status-badge"
 import { StatusBadge } from "@/components/ui/badge"
 import Link from "next/link"
 
+function currentMonth() {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
+}
+
 export default async function DashboardPage() {
-  const [clients, meetings, serviceRows] = await Promise.all([
-    prisma.client.findMany({ include: { services: true } }),
+  const month = currentMonth()
+
+  const [clients, meetings, serviceRows, paymentsThisMonth] = await Promise.all([
+    prisma.client.findMany({ include: { services: true, payments: { select: { month: true } } } }),
     prisma.meeting.findMany({
       where: { status: "PROGRAMADA", scheduledAt: { gte: new Date() } },
       orderBy: { scheduledAt: "asc" },
@@ -17,11 +25,17 @@ export default async function DashboardPage() {
       include: { client: true },
     }),
     prisma.clientService.groupBy({ by: ["service"], _count: { service: true } }),
+    prisma.payment.findMany({
+      where: { month },
+      select: { amountARS: true },
+    }),
   ])
 
   const active = clients.filter((c) => c.status === "ACTIVO")
-  const mrr = active.reduce((sum, c) => sum + c.monthlyAmount, 0)
-  const pipeline = clients.filter((c) => c.status === "PROSPECTO").reduce((sum, c) => sum + c.monthlyAmount, 0)
+  const mrr = active
+    .filter((c) => c.billingType === "MONTHLY")
+    .reduce((sum, c) => sum + c.monthlyAmount, 0)
+  const cobradoEsteMes = paymentsThisMonth.reduce((sum, p) => sum + p.amountARS, 0)
   const convRate = clients.length > 0 ? Math.round((active.length / clients.length) * 100) : 0
 
   const pipelineData = ["PROSPECTO", "ACTIVO", "PAUSADO", "PERDIDO"].map((status) => ({
@@ -34,14 +48,14 @@ export default async function DashboardPage() {
   const recentClients = await prisma.client.findMany({
     orderBy: { updatedAt: "desc" },
     take: 5,
-    include: { services: true },
+    include: { services: true, payments: { select: { month: true } } },
   })
 
   return (
     <div>
       <div className="mb-12 flex justify-between items-end">
         <div>
-          <h2 className="text-4xl font-extrabold tracking-tighter text-white mb-2">Performance Architecture</h2>
+          <h2 className="text-4xl font-extrabold tracking-tighter text-white mb-2">Dashboard</h2>
           <p className="text-neutral-500 font-medium tracking-tight">Resumen operativo en tiempo real.</p>
         </div>
       </div>
@@ -49,9 +63,9 @@ export default async function DashboardPage() {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         <StatCard label="Clientes Activos" value={String(active.length)} icon="groups" delta={`${clients.length} total`} />
-        <StatCard label="MRR" value={`$${mrr.toLocaleString()}`} icon="payments" delta="mensual" />
+        <StatCard label="Abonos proyectados" value={`USD ${mrr.toLocaleString()}`} icon="payments" delta="mensual · clientes activos" />
+        <StatCard label="Cobrado este mes" value={`$${cobradoEsteMes.toLocaleString("es-AR")} ARS`} icon="account_balance_wallet" delta={month} deltaPositive={cobradoEsteMes > 0} />
         <StatCard label="Tasa de Conversión" value={`${convRate}%`} icon="query_stats" deltaPositive={convRate > 50} />
-        <StatCard label="Pipeline Value" value={`$${pipeline.toLocaleString()}`} icon="hub" delta="prospectos" />
       </div>
 
       {/* Charts */}
@@ -92,7 +106,7 @@ export default async function DashboardPage() {
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-white/5">
-                {["Cliente", "Estado", "Servicios", "Inversión"].map((h) => (
+                {["Cliente", "Estado", "Pago", "Servicios"].map((h) => (
                   <th key={h} className="pb-4 text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-500">{h}</th>
                 ))}
               </tr>
@@ -113,14 +127,17 @@ export default async function DashboardPage() {
                   </td>
                   <td className="py-4"><StatusBadge status={c.status} /></td>
                   <td className="py-4">
+                    <PaymentStatusBadge
+                      billingType={c.billingType}
+                      payments={c.payments}
+                    />
+                  </td>
+                  <td className="py-4">
                     <div className="flex gap-1 flex-wrap">
                       {c.services.map((s) => (
                         <span key={s.id} className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase">{s.service.replace("_", " ")}</span>
                       ))}
                     </div>
-                  </td>
-                  <td className="py-4">
-                    <p className="text-sm font-bold text-white">${c.monthlyAmount.toLocaleString()} <span className="text-[10px] text-neutral-500 font-medium">/mo</span></p>
                   </td>
                 </tr>
               ))}

@@ -9,8 +9,8 @@ type ClientData = {
   id?: string
   name?: string; company?: string; email?: string; phone?: string
   website?: string; industry?: string; status?: string
-  monthlyAmount?: number; metaBudget?: number; googleBudget?: number
-  billingType?: string; lastPaymentDate?: string; lastPaidMonth?: string
+  billingType?: string; monthlyAmount?: number; commissionRate?: number
+  metaBudget?: number; googleBudget?: number
   contractStartDate?: string; lastContactDate?: string
   assignedToId?: string; notes?: string
   services?: { service: string }[]
@@ -25,6 +25,7 @@ export default function ClientForm({ client, users }: { client?: ClientData; use
   const [selectedServices, setSelectedServices] = useState<string[]>(
     client?.services?.map((s) => s.service) ?? []
   )
+  const [billingType, setBillingType] = useState(client?.billingType ?? "MONTHLY")
 
   function toggleService(s: string) {
     setSelectedServices((prev) => prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s])
@@ -41,12 +42,11 @@ export default function ClientForm({ client, users }: { client?: ClientData; use
       website: fd.get("website") as string || undefined,
       industry: fd.get("industry") as string || undefined,
       status: fd.get("status") as string,
-      monthlyAmount: Number(fd.get("monthlyAmount")),
+      billingType: fd.get("billingType") as string,
+      monthlyAmount: billingType === "MONTHLY" ? Number(fd.get("monthlyAmount")) : 0,
+      commissionRate: billingType === "COMMISSION" ? Number(fd.get("commissionRate")) : undefined,
       metaBudget: fd.get("metaBudget") ? Number(fd.get("metaBudget")) : undefined,
       googleBudget: fd.get("googleBudget") ? Number(fd.get("googleBudget")) : undefined,
-      billingType: fd.get("billingType") as string,
-      lastPaymentDate: fd.get("lastPaymentDate") as string || undefined,
-      lastPaidMonth: fd.get("lastPaidMonth") as string || undefined,
       contractStartDate: fd.get("contractStartDate") as string || undefined,
       lastContactDate: fd.get("lastContactDate") as string || undefined,
       assignedToId: fd.get("assignedToId") as string || undefined,
@@ -55,9 +55,8 @@ export default function ClientForm({ client, users }: { client?: ClientData; use
     }
     setError(null)
     startTransition(async () => {
-      if (isEdit) {
-        await updateClient(client!.id!, data)
-      } else {
+      if (isEdit) await updateClient(client!.id!, data)
+      else {
         const result = await createClient(data)
         if (result?.error) setError(result.error)
       }
@@ -69,7 +68,7 @@ export default function ClientForm({ client, users }: { client?: ClientData; use
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      {/* Identidad */}
+      {/* Datos de contacto */}
       <section className="bg-surface-container-low rounded-2xl p-8">
         <h3 className="text-lg font-bold text-white tracking-tight mb-6">Datos de Contacto</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -89,7 +88,7 @@ export default function ClientForm({ client, users }: { client?: ClientData; use
         </div>
       </section>
 
-      {/* Comercial */}
+      {/* Info comercial */}
       <section className="bg-surface-container-low rounded-2xl p-8">
         <h3 className="text-lg font-bold text-white tracking-tight mb-6">Info Comercial</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -100,25 +99,23 @@ export default function ClientForm({ client, users }: { client?: ClientData; use
             </select>
           </div>
           <div>
-            <label className={labelClass}>Inversión mensual ($)</label>
-            <input name="monthlyAmount" type="number" min="0" step="0.01" required defaultValue={client?.monthlyAmount ?? ""} className={inputClass} />
-          </div>
-          <div>
-            <label className={labelClass}>Presupuesto Meta ($)</label>
-            <input name="metaBudget" type="number" min="0" step="0.01" defaultValue={client?.metaBudget ?? ""} placeholder="Opcional" className={inputClass} />
-          </div>
-          <div>
-            <label className={labelClass}>Presupuesto Google ($)</label>
-            <input name="googleBudget" type="number" min="0" step="0.01" defaultValue={client?.googleBudget ?? ""} placeholder="Opcional" className={inputClass} />
-          </div>
-          <div>
             <label className={labelClass}>Responsable</label>
             <select name="assignedToId" defaultValue={client?.assignedToId ?? ""} className={inputClass}>
               <option value="">Sin asignar</option>
               {users.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
             </select>
           </div>
+          <div>
+            <label className={labelClass}>Inicio de contrato</label>
+            <input name="contractStartDate" type="date" defaultValue={client?.contractStartDate?.slice(0, 10) ?? ""} className={inputClass} />
+          </div>
+          <div>
+            <label className={labelClass}>Último contacto</label>
+            <input name="lastContactDate" type="date" defaultValue={client?.lastContactDate?.slice(0, 10) ?? ""} className={inputClass} />
+          </div>
         </div>
+
+        {/* Servicios */}
         <div className="mt-6">
           <label className={labelClass}>Servicios contratados</label>
           <div className="flex gap-3 flex-wrap mt-2">
@@ -136,28 +133,36 @@ export default function ClientForm({ client, users }: { client?: ClientData; use
       <section className="bg-surface-container-low rounded-2xl p-8">
         <h3 className="text-lg font-bold text-white tracking-tight mb-6">Facturación</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className={labelClass}>Tipo de pago</label>
-            <select name="billingType" defaultValue={client?.billingType ?? "PREPAID"} className={inputClass}>
+          <div className="md:col-span-2">
+            <label className={labelClass}>Tipo de facturación</label>
+            <select name="billingType" value={billingType} onChange={(e) => setBillingType(e.target.value)} className={inputClass}>
               {Object.entries(BILLING_TYPE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
             </select>
           </div>
-          <div>
-            <label className={labelClass}>Último pago</label>
-            <input name="lastPaymentDate" type="date" defaultValue={client?.lastPaymentDate?.slice(0, 10) ?? ""} className={inputClass} />
-          </div>
-          <div>
-            <label className={labelClass}>Mes abonado (YYYY-MM)</label>
-            <input name="lastPaidMonth" type="month" defaultValue={client?.lastPaidMonth ?? ""} className={inputClass} />
-          </div>
-          <div>
-            <label className={labelClass}>Inicio de contrato</label>
-            <input name="contractStartDate" type="date" defaultValue={client?.contractStartDate?.slice(0, 10) ?? ""} className={inputClass} />
-          </div>
-          <div>
-            <label className={labelClass}>Último contacto</label>
-            <input name="lastContactDate" type="date" defaultValue={client?.lastContactDate?.slice(0, 10) ?? ""} className={inputClass} />
-          </div>
+
+          {billingType === "MONTHLY" && (
+            <>
+              <div>
+                <label className={labelClass}>Abono mensual (USD)</label>
+                <input name="monthlyAmount" type="number" min="0" step="0.01" required defaultValue={client?.monthlyAmount ?? ""} className={inputClass} />
+              </div>
+              <div>
+                <label className={labelClass}>Presupuesto Meta Ads (USD)</label>
+                <input name="metaBudget" type="number" min="0" step="0.01" defaultValue={client?.metaBudget ?? ""} placeholder="Opcional" className={inputClass} />
+              </div>
+              <div>
+                <label className={labelClass}>Presupuesto Google Ads (USD)</label>
+                <input name="googleBudget" type="number" min="0" step="0.01" defaultValue={client?.googleBudget ?? ""} placeholder="Opcional" className={inputClass} />
+              </div>
+            </>
+          )}
+
+          {billingType === "COMMISSION" && (
+            <div>
+              <label className={labelClass}>Porcentaje de comisión (%)</label>
+              <input name="commissionRate" type="number" min="0" max="100" step="0.1" required defaultValue={client?.commissionRate ?? ""} placeholder="Ej: 10" className={inputClass} />
+            </div>
+          )}
         </div>
       </section>
 
@@ -166,6 +171,7 @@ export default function ClientForm({ client, users }: { client?: ClientData; use
           Error: {error}
         </div>
       )}
+
       <div className="flex justify-end gap-3">
         <Button type="submit" disabled={isPending}>
           <span className="material-symbols-outlined text-base">save</span>

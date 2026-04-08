@@ -5,9 +5,12 @@ import Link from "next/link"
 import { prisma } from "@/lib/db"
 import ClientTabs from "@/components/client-tabs"
 import ClientForm from "@/components/client-form"
+import PaymentsTab from "@/components/payments-tab"
+import PaymentStatusBadge from "@/components/payment-status-badge"
 import { StatusBadge, MeetingStatusBadge } from "@/components/ui/badge"
 import DeleteClientButton from "@/components/delete-client-button"
 import NotesForm from "@/components/notes-form"
+import { BILLING_TYPE_LABEL, type BillingType } from "@/lib/constants"
 
 export default async function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -15,7 +18,12 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
   const [client, users] = await Promise.all([
     prisma.client.findUnique({
       where: { id },
-      include: { services: true, meetings: { orderBy: { scheduledAt: "desc" } }, assignedTo: true },
+      include: {
+        services: true,
+        meetings: { orderBy: { scheduledAt: "desc" } },
+        assignedTo: true,
+        payments: { orderBy: { date: "desc" } },
+      },
     }),
     prisma.user.findMany({ select: { id: true, name: true } }),
   ])
@@ -25,6 +33,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
   const tabs = [
     { id: "info", label: "Info General" },
     { id: "billing", label: "Facturación" },
+    { id: "payments", label: `Pagos (${client.payments.length})` },
     { id: "meetings", label: `Reuniones (${client.meetings.length})` },
     { id: "notes", label: "Notas" },
   ]
@@ -38,12 +47,11 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
     website: client.website ?? undefined,
     industry: client.industry ?? undefined,
     status: client.status,
+    billingType: client.billingType,
     monthlyAmount: client.monthlyAmount,
+    commissionRate: client.commissionRate ?? undefined,
     metaBudget: client.metaBudget ?? undefined,
     googleBudget: client.googleBudget ?? undefined,
-    billingType: client.billingType,
-    lastPaymentDate: client.lastPaymentDate?.toISOString() ?? undefined,
-    lastPaidMonth: client.lastPaidMonth ?? undefined,
     contractStartDate: client.contractStartDate?.toISOString() ?? undefined,
     lastContactDate: client.lastContactDate?.toISOString() ?? undefined,
     assignedToId: client.assignedToId ?? undefined,
@@ -67,7 +75,13 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
             <div>
               <h2 className="text-3xl font-extrabold tracking-tighter text-white">{client.company}</h2>
               <p className="text-neutral-500 mt-1">{client.name} · {client.email}</p>
-              <div className="mt-2"><StatusBadge status={client.status} /></div>
+              <div className="mt-2 flex items-center gap-2">
+                <StatusBadge status={client.status} />
+                <PaymentStatusBadge
+                  billingType={client.billingType}
+                  payments={client.payments.map(p => ({ month: p.month }))}
+                />
+              </div>
             </div>
           </div>
           <DeleteClientButton clientId={client.id} />
@@ -82,24 +96,58 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
         {/* Tab 2: Facturación */}
         <div className="bg-surface-container-low rounded-2xl p-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[
-              { label: "Inversión mensual", value: `$${client.monthlyAmount.toLocaleString()}` },
-              { label: "Tipo de pago", value: client.billingType === "PREPAID" ? "Por adelantado" : "A mes vencido" },
-              { label: "Último pago", value: client.lastPaymentDate ? new Date(client.lastPaymentDate).toLocaleDateString("es-AR") : "—" },
-              { label: "Mes abonado", value: client.lastPaidMonth ?? "—" },
-              { label: "Inicio de contrato", value: client.contractStartDate ? new Date(client.contractStartDate).toLocaleDateString("es-AR") : "—" },
-              { label: "Presupuesto Meta", value: client.metaBudget ? `$${client.metaBudget.toLocaleString()}` : "—" },
-              { label: "Presupuesto Google", value: client.googleBudget ? `$${client.googleBudget.toLocaleString()}` : "—" },
-            ].map((item) => (
-              <div key={item.label}>
-                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-neutral-500 mb-1">{item.label}</p>
-                <p className="text-sm font-bold text-white">{item.value}</p>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-neutral-500 mb-1">Tipo de facturación</p>
+              <p className="text-sm font-bold text-white">{BILLING_TYPE_LABEL[client.billingType as BillingType] ?? client.billingType}</p>
+            </div>
+            {client.billingType === "MONTHLY" && (
+              <>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-neutral-500 mb-1">Abono mensual</p>
+                  <p className="text-sm font-bold text-white">USD {client.monthlyAmount.toLocaleString()}</p>
+                </div>
+                {client.metaBudget && (
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-neutral-500 mb-1">Presupuesto Meta Ads</p>
+                    <p className="text-sm font-bold text-white">USD {client.metaBudget.toLocaleString()}</p>
+                  </div>
+                )}
+                {client.googleBudget && (
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-neutral-500 mb-1">Presupuesto Google Ads</p>
+                    <p className="text-sm font-bold text-white">USD {client.googleBudget.toLocaleString()}</p>
+                  </div>
+                )}
+              </>
+            )}
+            {client.billingType === "COMMISSION" && (
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-neutral-500 mb-1">Comisión acordada</p>
+                <p className="text-sm font-bold text-white">{client.commissionRate}%</p>
               </div>
-            ))}
+            )}
+            {client.contractStartDate && (
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-neutral-500 mb-1">Inicio de contrato</p>
+                <p className="text-sm font-bold text-white">{new Date(client.contractStartDate).toLocaleDateString("es-AR")}</p>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Tab 3: Meetings */}
+        {/* Tab 3: Pagos */}
+        <PaymentsTab
+          clientId={client.id}
+          payments={client.payments.map(p => ({
+            id: p.id,
+            amountARS: p.amountARS,
+            date: p.date,
+            month: p.month,
+            description: p.description,
+          }))}
+        />
+
+        {/* Tab 4: Meetings */}
         <div>
           <div className="flex justify-end mb-6">
             <Link href={`/meetings/new?clientId=${client.id}`} className="cta-gradient text-white py-2.5 px-5 rounded-xl font-bold text-sm flex items-center gap-2">
@@ -124,7 +172,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
           </div>
         </div>
 
-        {/* Tab 4: Notes */}
+        {/* Tab 5: Notes */}
         <NotesForm clientId={client.id} initialNotes={client.notes ?? ""} />
       </ClientTabs>
     </div>

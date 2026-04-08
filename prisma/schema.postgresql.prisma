@@ -27,12 +27,11 @@ model Client {
   website           String?
   industry          String?
   status            String          @default("PROSPECTO")
+  billingType       String          @default("MONTHLY")
   monthlyAmount     Float           @default(0)
+  commissionRate    Float?
   metaBudget        Float?
   googleBudget      Float?
-  billingType       String          @default("PREPAID")
-  lastPaymentDate   DateTime?
-  lastPaidMonth     String?
   contractStartDate DateTime?
   lastContactDate   DateTime?
   assignedToId      String?
@@ -42,6 +41,18 @@ model Client {
   updatedAt         DateTime        @updatedAt
   services          ClientService[]
   meetings          Meeting[]
+  payments          Payment[]
+}
+
+model Payment {
+  id          String   @id @default(cuid())
+  clientId    String
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  amountARS   Float
+  date        DateTime
+  month       String
+  description String?
+  createdAt   DateTime @default(now())
 }
 
 model ClientService {

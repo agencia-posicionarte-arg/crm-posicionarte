@@ -40,15 +40,17 @@ export const SERVICE_LABEL: Record<ServiceType, string> = {
 }
 
 export const BILLING_TYPE = {
-  PREPAID: "PREPAID",
-  POSTPAID: "POSTPAID",
+  MONTHLY: "MONTHLY",
+  COMMISSION: "COMMISSION",
+  ONE_TIME: "ONE_TIME",
 } as const
 
 export type BillingType = keyof typeof BILLING_TYPE
 
 export const BILLING_TYPE_LABEL: Record<BillingType, string> = {
-  PREPAID: "Pago por adelantado",
-  POSTPAID: "Pago a mes vencido",
+  MONTHLY: "Abono mensual (USD)",
+  COMMISSION: "Comisión (% a mes vencido)",
+  ONE_TIME: "Pago único",
 }
 
 export const MEETING_STATUS = {
