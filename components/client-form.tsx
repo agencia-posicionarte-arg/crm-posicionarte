@@ -25,7 +25,11 @@ export default function ClientForm({ client, users }: { client?: ClientData; use
   const [selectedServices, setSelectedServices] = useState<string[]>(
     client?.services?.map((s) => s.service) ?? []
   )
-  const [billingType, setBillingType] = useState(client?.billingType ?? "MONTHLY")
+  // Fallback para valores viejos (PREPAID/POSTPAID) que se mapean a MONTHLY
+  const initialBillingType = (client?.billingType === "MONTHLY" || client?.billingType === "COMMISSION" || client?.billingType === "ONE_TIME")
+    ? client.billingType
+    : "MONTHLY"
+  const [billingType, setBillingType] = useState(initialBillingType)
 
   function toggleService(s: string) {
     setSelectedServices((prev) => prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s])
