@@ -47,11 +47,14 @@ export async function createClient(data: ClientFormData): Promise<{ error?: stri
         lastContactDate: lastContactDate ? new Date(lastContactDate) : null,
         contractStartDate: contractStartDate ? new Date(contractStartDate) : null,
         assignedToId: rest.assignedToId || session.user.id,
-        services: {
-          create: services.map((s) => ({ service: s })),
-        },
       },
     })
+
+    if (services.length > 0) {
+      await prisma.clientService.createMany({
+        data: services.map((s) => ({ clientId: client.id, service: s })),
+      })
+    }
 
     revalidatePath("/clients")
     redirect(`/clients/${client.id}`)
