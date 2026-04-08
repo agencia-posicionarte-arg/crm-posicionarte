@@ -22,19 +22,21 @@ export const CLIENT_STATUS_COLOR: Record<ClientStatus, string> = {
 }
 
 export const SERVICE = {
-  SEO: "SEO",
-  PAID_MEDIA: "PAID_MEDIA",
-  SOCIAL_STRATEGY: "SOCIAL_STRATEGY",
-  OTRO: "OTRO",
+  SITIO_WEB: "SITIO_WEB",
+  SOCIAL_MEDIA: "SOCIAL_MEDIA",
+  GOOGLE_ADS: "GOOGLE_ADS",
+  META_ADS: "META_ADS",
+  AUTOMATIZACIONES: "AUTOMATIZACIONES",
 } as const
 
 export type ServiceType = keyof typeof SERVICE
 
 export const SERVICE_LABEL: Record<ServiceType, string> = {
-  SEO: "SEO",
-  PAID_MEDIA: "Paid Media",
-  SOCIAL_STRATEGY: "Social Strategy",
-  OTRO: "Otro",
+  SITIO_WEB: "Sitio Web (SEO-AEO)",
+  SOCIAL_MEDIA: "Social Media",
+  GOOGLE_ADS: "Google Ads",
+  META_ADS: "Meta Ads",
+  AUTOMATIZACIONES: "Automatizaciones",
 }
 
 export const BILLING_TYPE = {

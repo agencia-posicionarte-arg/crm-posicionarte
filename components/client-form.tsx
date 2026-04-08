@@ -52,9 +52,9 @@ export default function ClientForm({ client, users }: { client?: ClientData; use
       notes: fd.get("notes") as string || undefined,
       services: selectedServices,
     }
-    startTransition(() => {
-      if (isEdit) updateClient(client!.id!, data)
-      else createClient(data)
+    startTransition(async () => {
+      if (isEdit) await updateClient(client!.id!, data)
+      else await createClient(data)
     })
   }
 
