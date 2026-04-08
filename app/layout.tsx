@@ -11,7 +11,8 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: "Posicionarte CRM",
-  description: "CRM Architect para tu agencia",
+  description: "CRM interno de Posicionarte",
+  icons: { icon: "/favicon.png" },
 };
 
 export default function RootLayout({

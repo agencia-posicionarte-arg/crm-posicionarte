@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
 
@@ -17,17 +18,8 @@ export default function Sidebar() {
     <aside className="bg-surface-container-low h-screen w-64 fixed left-0 top-0 flex flex-col py-6 z-50">
       {/* Logo */}
       <div className="px-6 mb-10">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl cta-gradient flex items-center justify-center shadow-lg shadow-primary-container/20">
-            <span className="material-symbols-outlined text-white text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>
-              architecture
-            </span>
-          </div>
-          <div>
-            <h1 className="text-xl font-extrabold tracking-tighter text-white">Posicionarte</h1>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-neutral-500 font-bold">CRM Architect</p>
-          </div>
-        </div>
+        <Image src="/logo.png" alt="Posicionarte" width={160} height={48} className="object-contain" priority />
+        <p className="text-[10px] uppercase tracking-[0.2em] text-neutral-500 font-bold mt-2">CRM</p>
       </div>
 
       {/* Nav */}
