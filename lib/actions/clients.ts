@@ -32,28 +32,36 @@ async function requireSession() {
   return session
 }
 
-export async function createClient(data: ClientFormData) {
-  const session = await requireSession()
-  const { services, lastPaymentDate, lastContactDate, contractStartDate, ...rest } = data
+export async function createClient(data: ClientFormData): Promise<{ error?: string }> {
+  try {
+    const session = await requireSession()
+    const { services, lastPaymentDate, lastContactDate, contractStartDate, ...rest } = data
 
-  const client = await prisma.client.create({
-    data: {
-      ...rest,
-      monthlyAmount: Number(rest.monthlyAmount),
-      metaBudget: rest.metaBudget ? Number(rest.metaBudget) : null,
-      googleBudget: rest.googleBudget ? Number(rest.googleBudget) : null,
-      lastPaymentDate: lastPaymentDate ? new Date(lastPaymentDate) : null,
-      lastContactDate: lastContactDate ? new Date(lastContactDate) : null,
-      contractStartDate: contractStartDate ? new Date(contractStartDate) : null,
-      assignedToId: rest.assignedToId || session.user.id,
-      services: {
-        create: services.map((s) => ({ service: s })),
+    const client = await prisma.client.create({
+      data: {
+        ...rest,
+        monthlyAmount: Number(rest.monthlyAmount),
+        metaBudget: rest.metaBudget ? Number(rest.metaBudget) : null,
+        googleBudget: rest.googleBudget ? Number(rest.googleBudget) : null,
+        lastPaymentDate: lastPaymentDate ? new Date(lastPaymentDate) : null,
+        lastContactDate: lastContactDate ? new Date(lastContactDate) : null,
+        contractStartDate: contractStartDate ? new Date(contractStartDate) : null,
+        assignedToId: rest.assignedToId || session.user.id,
+        services: {
+          create: services.map((s) => ({ service: s })),
+        },
       },
-    },
-  })
+    })
 
-  revalidatePath("/clients")
-  redirect(`/clients/${client.id}`)
+    revalidatePath("/clients")
+    redirect(`/clients/${client.id}`)
+  } catch (e) {
+    // redirect() throws internally — re-throw so Next.js handles navigation
+    if ((e as { digest?: string }).digest?.startsWith("NEXT_REDIRECT")) throw e
+    console.error("[createClient]", e)
+    return { error: e instanceof Error ? e.message : String(e) }
+  }
+  return {}
 }
 
 export async function updateClient(id: string, data: Partial<ClientFormData>) {

@@ -21,6 +21,7 @@ type User = { id: string; name: string }
 export default function ClientForm({ client, users }: { client?: ClientData; users: User[] }) {
   const isEdit = !!client?.id
   const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
   const [selectedServices, setSelectedServices] = useState<string[]>(
     client?.services?.map((s) => s.service) ?? []
   )
@@ -52,9 +53,14 @@ export default function ClientForm({ client, users }: { client?: ClientData; use
       notes: fd.get("notes") as string || undefined,
       services: selectedServices,
     }
+    setError(null)
     startTransition(async () => {
-      if (isEdit) await updateClient(client!.id!, data)
-      else await createClient(data)
+      if (isEdit) {
+        await updateClient(client!.id!, data)
+      } else {
+        const result = await createClient(data)
+        if (result?.error) setError(result.error)
+      }
     })
   }
 
@@ -155,6 +161,11 @@ export default function ClientForm({ client, users }: { client?: ClientData; use
         </div>
       </section>
 
+      {error && (
+        <div className="bg-error/10 border border-error/30 text-error text-sm rounded-xl px-5 py-3">
+          Error: {error}
+        </div>
+      )}
       <div className="flex justify-end gap-3">
         <Button type="submit" disabled={isPending}>
           <span className="material-symbols-outlined text-base">save</span>
