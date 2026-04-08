@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { prisma } from "@/lib/db"
 import StatCard from "@/components/stat-card"
 import PipelineChart from "@/components/pipeline-chart"

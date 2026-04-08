@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { prisma } from "@/lib/db"
 import MeetingForm from "@/components/meeting-form"
 import Link from "next/link"
