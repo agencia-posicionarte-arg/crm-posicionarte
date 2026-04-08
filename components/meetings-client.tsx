@@ -34,7 +34,7 @@ export default function MeetingsClient({ meetings }: { meetings: Meeting[] }) {
   const groups = groupMeetings(filtered)
 
   function handleStatusChange(id: string, status: string) {
-    startTransition(() => updateMeeting(id, { status }))
+    startTransition(async () => { await updateMeeting(id, { status }) })
   }
 
   function MeetingRow({ m }: { m: Meeting }) {
@@ -104,7 +104,7 @@ export default function MeetingsClient({ meetings }: { meetings: Meeting[] }) {
         description="Esta acción no se puede deshacer."
         confirmLabel="Eliminar"
         danger
-        onConfirm={() => { if (deleteTarget) { startTransition(() => deleteMeeting(deleteTarget)); setDeleteTarget(null) } }}
+        onConfirm={() => { if (deleteTarget) { startTransition(async () => { await deleteMeeting(deleteTarget!); setDeleteTarget(null) }) } }}
         onCancel={() => setDeleteTarget(null)}
       />
     </div>

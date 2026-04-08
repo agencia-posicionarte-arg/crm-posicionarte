@@ -12,14 +12,14 @@ export default function MeetingForm({ clients, defaultClientId }: { clients: Cli
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const fd = new FormData(e.currentTarget)
-    startTransition(() =>
-      createMeeting({
+    startTransition(async () => {
+      await createMeeting({
         title: fd.get("title") as string,
         scheduledAt: fd.get("scheduledAt") as string,
         clientId: fd.get("clientId") as string,
         notes: fd.get("notes") as string || undefined,
       })
-    )
+    })
   }
 
   const inputClass = "w-full bg-surface-container border-b border-outline-variant/30 px-4 py-3 text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:border-b-primary transition-colors rounded-t-lg"
