@@ -47,11 +47,20 @@ export async function createClient(data: ClientFormData): Promise<{ error?: stri
         lastContactDate: lastContactDate ? new Date(lastContactDate) : null,
         contractStartDate: contractStartDate ? new Date(contractStartDate) : null,
         assignedToId: rest.assignedToId || session.user.id,
-        services: {
-          create: services.map((s) => ({ service: s })),
-        },
       },
     })
+
+    if (services.length > 0) {
+      try {
+        await prisma.clientService.createMany({
+          data: services.map((s) => ({ clientId: client.id, service: s })),
+        })
+      } catch (servicesError) {
+        // Si fallan los servicios, eliminar el cliente para no dejar data incompleta
+        await prisma.client.delete({ where: { id: client.id } })
+        throw servicesError
+      }
+    }
 
     revalidatePath("/clients")
     redirect(`/clients/${client.id}`)
