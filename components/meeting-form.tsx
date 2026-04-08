@@ -1,6 +1,6 @@
 "use client"
 
-import { useTransition } from "react"
+import { useState, useTransition } from "react"
 import { createMeeting } from "@/lib/actions/meetings"
 import { Button } from "@/components/ui/button"
 
@@ -8,17 +8,20 @@ type Client = { id: string; company: string }
 
 export default function MeetingForm({ clients, defaultClientId }: { clients: Client[]; defaultClientId?: string }) {
   const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const fd = new FormData(e.currentTarget)
+    setError(null)
     startTransition(async () => {
-      await createMeeting({
+      const result = await createMeeting({
         title: fd.get("title") as string,
         scheduledAt: fd.get("scheduledAt") as string,
         clientId: fd.get("clientId") as string,
         notes: fd.get("notes") as string || undefined,
       })
+      if (result?.error) setError(result.error)
     })
   }
 
@@ -49,6 +52,11 @@ export default function MeetingForm({ clients, defaultClientId }: { clients: Cli
           <label className={labelClass}>Notas (opcional)</label>
           <textarea name="notes" rows={4} placeholder="Agenda, objetivos, contexto..." className="w-full bg-surface-container rounded-xl px-4 py-3 text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:ring-1 focus:ring-primary-container/30 resize-none" />
         </div>
+        {error && (
+          <div className="bg-error/10 border border-error/30 text-error text-sm rounded-xl px-5 py-3">
+            Error: {error}
+          </div>
+        )}
         <div className="flex justify-end">
           <Button type="submit" disabled={isPending}>
             {isPending ? "Guardando..." : "Crear reunión"}
