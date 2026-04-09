@@ -7,8 +7,12 @@ import { prisma } from "@/lib/db"
 
 async function requireSession() {
   const session = await auth()
-  if (!session?.user?.id) throw new Error("Unauthorized")
-  return session
+  if (!session?.user?.email) throw new Error("Unauthorized")
+  // Buscar el user real en DB por email para garantizar que el ID sea correcto
+  // (evita FK errors cuando el JWT tiene un ID de una DB anterior)
+  const user = await prisma.user.findUnique({ where: { email: session.user.email } })
+  if (!user) throw new Error("Unauthorized")
+  return { ...session, user: { ...session.user, id: user.id } }
 }
 
 export async function createMeeting(data: {

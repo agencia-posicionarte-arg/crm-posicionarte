@@ -129,6 +129,8 @@ export default async function DashboardPage() {
                   <td className="py-4">
                     <PaymentStatusBadge
                       billingType={c.billingType}
+                      paymentTiming={c.paymentTiming}
+                      status={c.status}
                       payments={c.payments}
                     />
                   </td>

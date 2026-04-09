@@ -10,7 +10,7 @@ import PaymentStatusBadge from "@/components/payment-status-badge"
 import { StatusBadge, MeetingStatusBadge } from "@/components/ui/badge"
 import DeleteClientButton from "@/components/delete-client-button"
 import NotesForm from "@/components/notes-form"
-import { BILLING_TYPE_LABEL, type BillingType } from "@/lib/constants"
+import { BILLING_TYPE_LABEL, PAYMENT_TIMING_LABEL, type BillingType, type PaymentTiming } from "@/lib/constants"
 
 export default async function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -79,6 +79,8 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
                 <StatusBadge status={client.status} />
                 <PaymentStatusBadge
                   billingType={client.billingType}
+                  paymentTiming={client.paymentTiming}
+                  status={client.status}
                   payments={client.payments.map(p => ({ month: p.month }))}
                 />
               </div>
@@ -100,6 +102,12 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
               <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-neutral-500 mb-1">Tipo de facturación</p>
               <p className="text-sm font-bold text-white">{BILLING_TYPE_LABEL[client.billingType as BillingType] ?? client.billingType}</p>
             </div>
+            {client.billingType !== "ONE_TIME" && (
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-neutral-500 mb-1">Momento de pago</p>
+                <p className="text-sm font-bold text-white">{PAYMENT_TIMING_LABEL[client.paymentTiming as PaymentTiming] ?? client.paymentTiming}</p>
+              </div>
+            )}
             {client.billingType === "MONTHLY" && (
               <>
                 <div>

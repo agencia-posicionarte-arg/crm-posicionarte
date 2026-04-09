@@ -53,6 +53,18 @@ export const BILLING_TYPE_LABEL: Record<BillingType, string> = {
   ONE_TIME: "Pago único",
 }
 
+export const PAYMENT_TIMING = {
+  ADVANCE: "ADVANCE",
+  ARREAR: "ARREAR",
+} as const
+
+export type PaymentTiming = keyof typeof PAYMENT_TIMING
+
+export const PAYMENT_TIMING_LABEL: Record<PaymentTiming, string> = {
+  ADVANCE: "Adelantado (paga el mes en curso)",
+  ARREAR: "Mes vencido (paga el mes anterior)",
+}
+
 export const MEETING_STATUS = {
   PROGRAMADA: "PROGRAMADA",
   REALIZADA: "REALIZADA",

@@ -14,6 +14,7 @@ export type ClientFormData = {
   industry?: string
   status: string
   billingType: string
+  paymentTiming: string
   monthlyAmount: number
   commissionRate?: number
   metaBudget?: number

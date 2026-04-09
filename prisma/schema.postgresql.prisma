@@ -28,6 +28,7 @@ model Client {
   industry          String?
   status            String          @default("PROSPECTO")
   billingType       String          @default("MONTHLY")
+  paymentTiming     String          @default("ADVANCE")
   monthlyAmount     Float           @default(0)
   commissionRate    Float?
   metaBudget        Float?
