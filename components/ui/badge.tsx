@@ -12,7 +12,7 @@ export function StatusBadge({ status }: { status: string }) {
 
 export function ServiceBadge({ service }: { service: string }) {
   return (
-    <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider">
+    <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold tracking-wider">
       {SERVICE_LABEL[service as ServiceType] ?? service}
     </span>
   )
