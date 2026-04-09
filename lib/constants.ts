@@ -17,11 +17,11 @@ export const CLIENT_STATUS_LABEL: Record<ClientStatus, string> = {
 }
 
 export const CLIENT_STATUS_COLOR: Record<ClientStatus, string> = {
-  PROSPECTO: "bg-primary/10 text-primary",
+  PROSPECTO: "bg-yellow-400/10 text-yellow-400",
   ACTIVO: "bg-secondary/10 text-secondary",
-  PAUSADO: "bg-surface-container-highest text-on-surface-variant",
-  FINALIZADO: "bg-surface-container-highest text-neutral-500",
-  PERDIDO: "bg-error/10 text-error",
+  PAUSADO: "bg-surface-container-highest text-neutral-400",
+  FINALIZADO: "bg-error/10 text-error",
+  PERDIDO: "bg-error/20 text-error/70",
 }
 
 export const SERVICE = {
