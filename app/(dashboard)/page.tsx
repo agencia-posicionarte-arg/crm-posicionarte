@@ -112,43 +112,6 @@ export default async function DashboardPage() {
         <StatCard label="Tasa de Conversión" value={`${convRate}%`} icon="query_stats" deltaPositive={convRate > 50} />
       </div>
 
-      {/* KPI Cards — históricos */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
-        <StatCard
-          label="Ingreso acumulado"
-          value={`$${Math.round(totalHistorico / 1_000_000).toLocaleString("es-AR")}M ARS`}
-          icon="savings"
-          delta="histórico total"
-        />
-        <StatCard
-          label="Crecimiento vs mes ant."
-          value={crecimiento !== null ? `${crecimiento > 0 ? "+" : ""}${crecimiento}%` : "—"}
-          icon="trending_up"
-          deltaPositive={crecimiento !== null && crecimiento >= 0}
-          delta={`vs ${prevMonth}`}
-        />
-        <StatCard
-          label="Promedio mensual"
-          value={`$${promedioMensual.toLocaleString("es-AR")} ARS`}
-          icon="equalizer"
-          delta={`${monthlyHistory.length} meses`}
-        />
-        <StatCard
-          label="Mejor mes histórico"
-          value={mejorMes ? `$${Math.round((mejorMes._sum.amountARS ?? 0) / 1_000).toLocaleString("es-AR")}K` : "—"}
-          icon="emoji_events"
-          delta={mejorMes ? formatMonthLabel(mejorMes.month) : ""}
-          deltaPositive
-        />
-        <StatCard
-          label="Activos con deuda"
-          value={String(clientesConDeuda)}
-          icon="warning"
-          delta={`de ${active.length} activos`}
-          deltaPositive={clientesConDeuda === 0}
-        />
-      </div>
-
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
         <PipelineChart data={pipelineData} />
@@ -223,11 +186,48 @@ export default async function DashboardPage() {
       </div>
 
       {/* Gráfico histórico + Ranking */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
         <div className="lg:col-span-2">
           <MonthlyBarChart data={barData} />
         </div>
         <ClientRanking data={ranking} />
+      </div>
+
+      {/* KPI Cards — históricos */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        <StatCard
+          label="Ingreso acumulado"
+          value={`$${(totalHistorico / 1_000_000).toFixed(2)}M ARS`}
+          icon="savings"
+          delta="histórico total"
+        />
+        <StatCard
+          label="Crecimiento vs mes ant."
+          value={crecimiento !== null ? `${crecimiento > 0 ? "+" : ""}${crecimiento}%` : "—"}
+          icon="trending_up"
+          deltaPositive={crecimiento !== null && crecimiento >= 0}
+          delta={`vs ${formatMonthLabel(prevMonth)}`}
+        />
+        <StatCard
+          label="Promedio mensual"
+          value={`$${promedioMensual.toLocaleString("es-AR")} ARS`}
+          icon="equalizer"
+          delta={`${monthlyHistory.length} meses`}
+        />
+        <StatCard
+          label="Mejor mes histórico"
+          value={mejorMes ? formatMonthLabel(mejorMes.month) : "—"}
+          icon="emoji_events"
+          delta={mejorMes ? `$${((mejorMes._sum.amountARS ?? 0) / 1_000_000).toFixed(2)}M ARS` : ""}
+          deltaPositive
+        />
+        <StatCard
+          label="Activos con deuda"
+          value={String(clientesConDeuda)}
+          icon="warning"
+          delta={`de ${active.length} activos`}
+          deltaPositive={clientesConDeuda === 0}
+        />
       </div>
     </div>
   )
