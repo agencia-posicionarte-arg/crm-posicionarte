@@ -24,7 +24,7 @@ export default async function DashboardPage() {
       take: 3,
       include: { client: true },
     }),
-    prisma.clientService.groupBy({ by: ["service"], _count: { service: true } }),
+    prisma.clientService.groupBy({ by: ["service"], where: { client: { status: "ACTIVO" } }, _count: { service: true } }),
     prisma.payment.findMany({
       where: { month },
       select: { amountARS: true },
@@ -71,7 +71,7 @@ export default async function DashboardPage() {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
         <PipelineChart data={pipelineData} />
-        <ServiceDonut data={serviceData} />
+        <ServiceDonut data={serviceData} activeCount={active.length} />
       </div>
 
       {/* Bottom: Meetings + Recent Clients */}

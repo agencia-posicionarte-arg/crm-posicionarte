@@ -2,13 +2,14 @@ import { SERVICE_LABEL } from "@/lib/constants"
 
 interface ServiceDonutProps {
   data: { service: string; count: number }[]
+  activeCount: number
 }
 
 const COLORS = ["#3256d7", "#41e575", "#b8c4ff", "#c8c6c6"]
 const R = 80
 const CIRC = 2 * Math.PI * R
 
-export default function ServiceDonut({ data }: ServiceDonutProps) {
+export default function ServiceDonut({ data, activeCount }: ServiceDonutProps) {
   const total = data.reduce((sum, d) => sum + d.count, 0) || 1
   let cumulative = 0
 
@@ -37,8 +38,8 @@ export default function ServiceDonut({ data }: ServiceDonutProps) {
           })}
         </svg>
         <div className="absolute flex flex-col items-center">
-          <span className="text-2xl font-black text-white">{total}</span>
-          <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest">clientes</span>
+          <span className="text-2xl font-black text-white">{activeCount}</span>
+          <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest">activos</span>
         </div>
       </div>
       <div className="mt-6 space-y-3">
