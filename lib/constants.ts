@@ -25,6 +25,7 @@ export const CLIENT_STATUS_COLOR: Record<ClientStatus, string> = {
 }
 
 export const SERVICE = {
+  FULL_POSI: "FULL_POSI",
   SITIO_WEB: "SITIO_WEB",
   SOCIAL_MEDIA: "SOCIAL_MEDIA",
   GOOGLE_ADS: "GOOGLE_ADS",
@@ -35,6 +36,7 @@ export const SERVICE = {
 export type ServiceType = keyof typeof SERVICE
 
 export const SERVICE_LABEL: Record<ServiceType, string> = {
+  FULL_POSI: "Full Posi",
   SITIO_WEB: "Sitio Web (SEO-AEO)",
   SOCIAL_MEDIA: "Social Media",
   GOOGLE_ADS: "Google Ads",
