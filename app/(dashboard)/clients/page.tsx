@@ -6,7 +6,7 @@ import Link from "next/link"
 
 export default async function ClientsPage() {
   const clients = await prisma.client.findMany({
-    orderBy: { updatedAt: "desc" },
+    orderBy: { monthlyAmount: "desc" },
     include: { services: true },
   })
 

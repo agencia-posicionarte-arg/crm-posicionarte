@@ -17,7 +17,7 @@ type Client = {
 
 export default function ClientTable({ clients }: { clients: Client[] }) {
   const [search, setSearch] = useState("")
-  const [statusFilter, setStatusFilter] = useState("ALL")
+  const [statusFilter, setStatusFilter] = useState("ACTIVO")
 
   const filtered = clients.filter((c) => {
     const matchSearch = search === "" ||
@@ -47,7 +47,7 @@ export default function ClientTable({ clients }: { clients: Client[] }) {
           className="bg-surface-container text-white text-sm px-4 py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary-container/30 border border-outline-variant/10"
         >
           <option value="ALL">Todos los estados</option>
-          {["PROSPECTO", "ACTIVO", "PAUSADO", "PERDIDO"].map((s) => (
+          {["PROSPECTO", "ACTIVO", "PAUSADO", "FINALIZADO", "PERDIDO"].map((s) => (
             <option key={s} value={s}>{s.charAt(0) + s.slice(1).toLowerCase()}</option>
           ))}
         </select>
