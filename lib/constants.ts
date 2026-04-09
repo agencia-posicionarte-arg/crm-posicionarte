@@ -2,6 +2,7 @@ export const CLIENT_STATUS = {
   PROSPECTO: "PROSPECTO",
   ACTIVO: "ACTIVO",
   PAUSADO: "PAUSADO",
+  FINALIZADO: "FINALIZADO",
   PERDIDO: "PERDIDO",
 } as const
 
@@ -11,6 +12,7 @@ export const CLIENT_STATUS_LABEL: Record<ClientStatus, string> = {
   PROSPECTO: "Prospecto",
   ACTIVO: "Activo",
   PAUSADO: "Pausado",
+  FINALIZADO: "Finalizado",
   PERDIDO: "Perdido",
 }
 
@@ -18,6 +20,7 @@ export const CLIENT_STATUS_COLOR: Record<ClientStatus, string> = {
   PROSPECTO: "bg-primary/10 text-primary",
   ACTIVO: "bg-secondary/10 text-secondary",
   PAUSADO: "bg-surface-container-highest text-on-surface-variant",
+  FINALIZADO: "bg-surface-container-highest text-neutral-500",
   PERDIDO: "bg-error/10 text-error",
 }
 

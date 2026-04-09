@@ -34,6 +34,7 @@ model Client {
   metaBudget        Float?
   googleBudget      Float?
   contractStartDate DateTime?
+  serviceEndDate    DateTime?
   lastContactDate   DateTime?
   assignedToId      String?
   assignedTo        User?           @relation(fields: [assignedToId], references: [id])

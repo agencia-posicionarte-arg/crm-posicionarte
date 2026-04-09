@@ -17,7 +17,7 @@ type Props = {
 }
 
 export default function PaymentStatusBadge({ billingType, paymentTiming, status, payments }: Props) {
-  if (status === "PROSPECTO") return null
+  if (status === "PROSPECTO" || status === "PAUSADO" || status === "FINALIZADO") return null
   if (billingType === "ONE_TIME") return null
 
   // Mes vencido: está al día si pagó el mes anterior

@@ -46,7 +46,7 @@ export default async function DashboardPage() {
   const serviceData = serviceRows.map((r) => ({ service: r.service, count: r._count.service }))
 
   const recentClients = await prisma.client.findMany({
-    orderBy: { updatedAt: "desc" },
+    orderBy: { monthlyAmount: "desc" },
     take: 5,
     include: { services: true, payments: { select: { month: true } } },
   })

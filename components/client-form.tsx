@@ -11,7 +11,7 @@ type ClientData = {
   website?: string; industry?: string; status?: string
   billingType?: string; paymentTiming?: string; monthlyAmount?: number; commissionRate?: number
   metaBudget?: number; googleBudget?: number
-  contractStartDate?: string; lastContactDate?: string
+  contractStartDate?: string; serviceEndDate?: string; lastContactDate?: string
   assignedToId?: string; notes?: string
   services?: { service: string }[]
 }
@@ -55,6 +55,7 @@ export default function ClientForm({ client, users }: { client?: ClientData; use
       metaBudget: fd.get("metaBudget") ? Number(fd.get("metaBudget")) : undefined,
       googleBudget: fd.get("googleBudget") ? Number(fd.get("googleBudget")) : undefined,
       contractStartDate: fd.get("contractStartDate") as string || undefined,
+      serviceEndDate: fd.get("serviceEndDate") as string || undefined,
       lastContactDate: fd.get("lastContactDate") as string || undefined,
       assignedToId: fd.get("assignedToId") as string || undefined,
       notes: fd.get("notes") as string || undefined,
@@ -123,6 +124,12 @@ export default function ClientForm({ client, users }: { client?: ClientData; use
                 <label className={labelClass}>Último contacto</label>
                 <input name="lastContactDate" type="date" defaultValue={client?.lastContactDate?.slice(0, 10) ?? ""} className={inputClass} />
               </div>
+              {status === "FINALIZADO" && (
+                <div>
+                  <label className={labelClass}>Fecha de finalización de servicios</label>
+                  <input name="serviceEndDate" type="date" defaultValue={client?.serviceEndDate?.slice(0, 10) ?? ""} className={inputClass} />
+                </div>
+              )}
             </>
           )}
         </div>
@@ -146,21 +153,21 @@ export default function ClientForm({ client, users }: { client?: ClientData; use
         <section className="bg-surface-container-low rounded-2xl p-8">
           <h3 className="text-lg font-bold text-white tracking-tight mb-6">Facturación</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
+            <div className="md:col-span-2">
               <label className={labelClass}>Tipo de facturación</label>
               <select name="billingType" value={billingType} onChange={(e) => setBillingType(e.target.value)} className={inputClass}>
                 {Object.entries(BILLING_TYPE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
               </select>
             </div>
-            <div>
-              <label className={labelClass}>Momento de pago</label>
-              <select name="paymentTiming" defaultValue={client?.paymentTiming ?? "ADVANCE"} className={inputClass}>
-                {Object.entries(PAYMENT_TIMING_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-              </select>
-            </div>
 
             {billingType === "MONTHLY" && (
               <>
+                <div>
+                  <label className={labelClass}>Momento de pago</label>
+                  <select name="paymentTiming" defaultValue={client?.paymentTiming ?? "ADVANCE"} className={inputClass}>
+                    {Object.entries(PAYMENT_TIMING_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                  </select>
+                </div>
                 <div>
                   <label className={labelClass}>Abono mensual (USD)</label>
                   <input name="monthlyAmount" type="number" min="0" step="0.01" required defaultValue={client?.monthlyAmount ?? ""} className={inputClass} />

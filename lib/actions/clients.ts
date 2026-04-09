@@ -20,6 +20,7 @@ export type ClientFormData = {
   metaBudget?: number
   googleBudget?: number
   contractStartDate?: string
+  serviceEndDate?: string
   lastContactDate?: string
   assignedToId?: string
   notes?: string
@@ -35,7 +36,7 @@ async function requireSession() {
 export async function createClient(data: ClientFormData): Promise<{ error?: string }> {
   try {
     const session = await requireSession()
-    const { services, lastContactDate, contractStartDate, ...rest } = data
+    const { services, lastContactDate, contractStartDate, serviceEndDate, ...rest } = data
 
     const client = await prisma.client.create({
       data: {
@@ -46,6 +47,7 @@ export async function createClient(data: ClientFormData): Promise<{ error?: stri
         googleBudget: rest.googleBudget ? Number(rest.googleBudget) : null,
         lastContactDate: lastContactDate ? new Date(lastContactDate) : null,
         contractStartDate: contractStartDate ? new Date(contractStartDate) : null,
+        serviceEndDate: serviceEndDate ? new Date(serviceEndDate) : null,
         assignedToId: rest.assignedToId || session.user.id,
       },
     })
@@ -73,7 +75,7 @@ export async function createClient(data: ClientFormData): Promise<{ error?: stri
 
 export async function updateClient(id: string, data: Partial<ClientFormData>) {
   await requireSession()
-  const { services, lastContactDate, contractStartDate, ...rest } = data
+  const { services, lastContactDate, contractStartDate, serviceEndDate, ...rest } = data
 
   await prisma.client.update({
     where: { id },
@@ -85,6 +87,7 @@ export async function updateClient(id: string, data: Partial<ClientFormData>) {
       googleBudget: rest.googleBudget !== undefined ? Number(rest.googleBudget) : undefined,
       lastContactDate: lastContactDate ? new Date(lastContactDate) : undefined,
       contractStartDate: contractStartDate ? new Date(contractStartDate) : undefined,
+      serviceEndDate: serviceEndDate !== undefined ? (serviceEndDate ? new Date(serviceEndDate) : null) : undefined,
     },
   })
 

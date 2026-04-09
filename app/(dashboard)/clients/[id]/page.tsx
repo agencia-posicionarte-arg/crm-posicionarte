@@ -53,6 +53,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
     metaBudget: client.metaBudget ?? undefined,
     googleBudget: client.googleBudget ?? undefined,
     contractStartDate: client.contractStartDate?.toISOString() ?? undefined,
+    serviceEndDate: client.serviceEndDate?.toISOString() ?? undefined,
     lastContactDate: client.lastContactDate?.toISOString() ?? undefined,
     assignedToId: client.assignedToId ?? undefined,
     notes: client.notes ?? undefined,
@@ -138,6 +139,12 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-neutral-500 mb-1">Inicio de contrato</p>
                 <p className="text-sm font-bold text-white">{new Date(client.contractStartDate).toLocaleDateString("es-AR")}</p>
+              </div>
+            )}
+            {client.serviceEndDate && (
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-neutral-500 mb-1">Finalización de servicios</p>
+                <p className="text-sm font-bold text-white">{new Date(client.serviceEndDate).toLocaleDateString("es-AR")}</p>
               </div>
             )}
           </div>
